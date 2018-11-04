@@ -1,0 +1,23 @@
+set -e
+set -x
+ALEXA_SKILLNAME=${1}
+
+./ci/aws-require ${MY_COMPANY_AWS_ACCOUNT}
+
+if [ -z "${ALEXA_SKILLNAME}" ]; then
+  echo "You must specify ALEXA_SKILLNAME"
+  exit 1
+fi
+
+(cd ${ALEXA_SKILLNAME}/src; vgo get -u)
+# (cd ${ALEXA_SKILLNAME}/src; vgo test)
+./ci/clean ${ALEXA_SKILLNAME}
+./ci/bootstrap-folder ${ALEXA_SKILLNAME}
+./ci/build-linux ${ALEXA_SKILLNAME}
+./ci/aws-log-bucket ${ALEXA_SKILLNAME}
+./ci/iam-role ${ALEXA_SKILLNAME}
+./ci/aws-lambda ${ALEXA_SKILLNAME}
+
+./ci/invoke-lambda ${ALEXA_SKILLNAME} hello
+
+
