@@ -1,0 +1,35 @@
+ALEXA_SKILLNAME=${1}
+
+## LAMBDA CREATION ##
+
+
+LAMBDA_DATA=`aws lambda get-function --function-name alexa-${ALEXA_SKILLNAME} 2> /dev/null`
+
+LAMBDA_EXISTS=$?
+DIST_ZIP="dist/${ALEXA_SKILLNAME}/linux-amd64/${ALEXA_SKILLNAME}.alexaskill.zip"
+
+if [ ! -f ${DIST_ZIP} ]; then
+  echo "${DIST_ZIP} does not exist! Cannot continue. Make sure your project builds first."
+  exit 1
+fi
+
+ROLE_ARN="arn:aws:iam::${AWS_ACCOUNT}:role/lambda_alexa_${ALEXA_SKILLNAME}"
+
+if [ ${LAMBDA_EXISTS} -gt 1 ]; then
+  echo "Creating AWS Lambda function from fileb://${DIST_ZIP} role: ${ROLE_ARN}"
+  aws lambda \
+      create-function \
+      --function-name alexa-${ALEXA_SKILLNAME} \
+      --runtime go1.x \
+      --role ${ROLE_ARN} \
+      --handler ${ALEXA_SKILLNAME} \
+      --description "Alexa Skill ${ALEXA_SKILLNAME} using Go" \
+      --zip-file "fileb://${DIST_ZIP}"
+else
+  echo "[OK] alexa-${ALEXA_SKILLNAME} already exists, updating"
+  aws lambda \
+    update-function-code \
+    --function-name alexa-${ALEXA_SKILLNAME} \
+    --zip-file "fileb://${DIST_ZIP}" \
+    --publish | jq '.FunctionArn'
+fi

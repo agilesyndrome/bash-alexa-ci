@@ -1,0 +1,8 @@
+ALEXA_SKILLNAME=${1}
+ALEXA_SKILLVERSION=${2}
+
+aws lambda \
+  update-alias \
+  --function-name alexa-${ALEXA_SKILLNAME} \
+  --name production  \
+  --function-version ${ALEXA_SKILLVERSION} |jq

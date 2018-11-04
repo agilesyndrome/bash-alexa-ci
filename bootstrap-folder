@@ -1,0 +1,9 @@
+ALEXA_SKILLNAME=${1}
+
+## CREATE FOLDER ##
+if [ ! -d ./${ALEXA_SKILLNAME} ]; then
+  echo "Copying helloworld to ${ALEXA_SKILLNAME}"
+  cp -r helloworld ${ALEXA_SKILLNAME}
+else
+  echo "[OK] ./${ALEXA_SKILLNAME} folder already exists"
+fi

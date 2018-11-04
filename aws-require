@@ -1,0 +1,10 @@
+if [ -z "${AWS_ACCOUNT}" ]; then
+  echo "You have not logged into the AWS CLI"
+  exit 1
+fi
+
+
+if [ "${AWS_ACCOUNT}" != "${1}" ]; then
+	echo "aws-session is tied to the wrong account."
+	exit 1
+fi

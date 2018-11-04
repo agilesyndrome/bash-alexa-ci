@@ -1,0 +1,18 @@
+## AWS:IAM Role ##
+ALEXA_SKILLNAME=${1}
+
+ROLE_DATA=`aws iam get-role --role-name lambda_alexa_${ALEXA_SKILLNAME} 2> /dev/null`
+
+ROLE_EXISTS=$?
+
+if [ ${ROLE_EXISTS} -gt 1 ]; then
+  echo "Creating new IAM Role"
+  aws iam \
+    create-role \
+    --role-name lambda_alexa_${ALEXA_SKILLNAME} \
+    --description "Alexa skill ${ALEXA_SKILLNAME} running in Lambda" \
+    --assume-role-policy-document file://iam-policies/basic_lambda_role.json | jq '.Role .Arn'
+else
+  echo "[OK] lambda_alexa_${ALEXA_SKILLNAME} iam role already exists."
+  ROLE_ARN=$(echo ${ROLE_DATA} | jq '.Role .Arn' | sed 's/\"//g')
+fi

@@ -1,0 +1,42 @@
+ALEXA_SKILLNAME=${1}
+
+if [ -z "${ALEXA_SKILLNAME}" ]; then
+  echo "Error: ALEXA_SKILLNAME was not provided!"
+  echo "Usage: ${0} skillname"
+  exit 1
+fi
+
+echo "Building ${ALEXA_SKILLNAME}"
+
+export GOOS=linux
+export GOARCH=amd64
+
+export BUILT_DIR=`pwd`/dist/${ALEXA_SKILLNAME}/${GOOS}-${GOARCH}
+export SRC_DIR=${ALEXA_SKILLNAME}/src
+
+mkdir -p ${BUILT_DIR}
+
+#Build Binary
+(cd ${SRC_DIR}; vgo build -o ${BUILT_DIR}/${ALEXA_SKILLNAME} main.go)
+
+#Copy i18n Files
+mkdir -p ${BUILT_DIR}/i18n
+cp -r ${SRC_DIR}/i18n.yml ${BUILT_DIR}
+
+(cd ${BUILT_DIR}; zip -r "${ALEXA_SKILLNAME}.alexaskill.zip" * )
+
+
+ZIP_CONTENTS=$(unzip -l ./dist/${ALEXA_SKILLNAME}/linux-amd64/${ALEXA_SKILLNAME}.alexaskill.zip)
+
+unzip -l ./dist/${ALEXA_SKILLNAME}/linux-amd64/${ALEXA_SKILLNAME}.alexaskill.zip
+
+#Zip file should have at least two files in it
+if [ -z "$(echo ${ZIP_CONTENTS} | grep -i 'i18n.yml')" ]; then
+   echo "i18n/en.json file is missing from zip!"
+   exit 1
+fi
+
+if [ -z "$(echo ${ZIP_CONTENTS} | grep "${ALEXA_SKILLNAME}")" ]; then
+   echo "Binary executable ${ALEXA_SKILLNAME} file is missing from zip!"
+   exit 1
+fi

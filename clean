@@ -1,0 +1,5 @@
+ALEXA_SKILLNAME=${1}
+
+if [ -n "${ALEXA_SKILLNAME}" ]; then
+  rm -rf ./dist/${ALEXA_SKILLNAME}/*
+fi

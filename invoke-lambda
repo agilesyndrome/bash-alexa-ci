@@ -1,0 +1,14 @@
+ALEXA_SKILLNAME=${1}
+mkdir -p tests/output
+
+TEST_JSON=`cat ${ALEXA_SKILLNAME}/tests/data/${2}.json | jq -c ''`
+echo ${TEST_JSON}
+
+mkdir -p ${ALEXA_SKILLNAME}/tests/output
+
+aws lambda invoke \
+  --function-name alexa-${ALEXA_SKILLNAME} \
+  --payload ${TEST_JSON} \
+  ${ALEXA_SKILLNAME}/tests/output/${2}.json > /dev/null
+
+cat ${ALEXA_SKILLNAME}/tests/output/${2}.json | jq
